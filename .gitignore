@@ -1,0 +1,4 @@
+node_modules/
+travelgenie-backend/node_modules/
+.env
+travelgenie-backend/.env

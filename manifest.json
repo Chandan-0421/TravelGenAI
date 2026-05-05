@@ -1,0 +1,16 @@
+{
+  "name": "TravelGenieAi Planner",
+  "short_name": "TravelGenie",
+  "description": "AI-Powered Tourist Recommendation and Budget Management System",
+  "start_url": "/index2.html",
+  "display": "standalone",
+  "background_color": "#113534",
+  "theme_color": "#F59E0B",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3125/3125713.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

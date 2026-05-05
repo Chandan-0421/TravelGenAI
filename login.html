@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | TravelGenieAi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* 🔥 PREMIUM WATER GLASS THEME VARIABLES 🔥 */
+        :root {
+            --brand-orange: #F59E0B;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(17, 53, 52, 0.4), rgba(17, 53, 52, 0.6)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        /* 🔥 GLASSMORPHISM LOGIN BOX 🔥 */
+        .auth-box {
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px; 
+            border-radius: 30px;
+            width: 100%; 
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            animation: floatUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .auth-box h2 { margin: 0 0 10px; font-size: 28px; color: #fff; font-weight: 800; }
+        .auth-box p { color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; font-size: 15px; }
+        
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.9); padding-left: 5px; }
+        
+        /* 🔥 PREMIUM INPUT FIELDS 🔥 */
+        .input-group input {
+            width: 100%; 
+            background: rgba(0, 0, 0, 0.2); 
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 14px 16px; 
+            border-radius: 14px; 
+            font-size: 15px; 
+            box-sizing: border-box;
+            color: white; 
+            transition: 0.3s;
+            outline: none;
+        }
+        .input-group input:focus { 
+            background: rgba(0, 0, 0, 0.3);
+            border-color: var(--brand-orange); 
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        }
+        .input-group input::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+        /* 🔥 OTP SPECIFIC CSS 🔥 */
+        .otp-input {
+            text-align: center;
+            font-size: 24px !important;
+            letter-spacing: 12px;
+            font-weight: 800;
+            padding-left: 20px !important; 
+        }
+        
+        .btn-auth {
+            width: 100%; background: var(--brand-orange); color: #111;
+            padding: 15px; border: none; border-radius: 14px;
+            font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+        .btn-auth:hover { 
+            transform: translateY(-2px); 
+            background: #FBBF24;
+            box-shadow: 0 12px 25px rgba(245, 158, 11, 0.4); 
+        }
+        
+        /* 🔥 FROSTED GLASS GOOGLE BUTTON 🔥 */
+        .btn-google {
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            color: #fff; 
+            padding: 14px; border-radius: 14px;
+            font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-google:hover { 
+            background: rgba(255, 255, 255, 0.15); 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+        .btn-google img { width: 20px; }
+        
+        /* 🔥 DIVIDER CSS 🔥 */
+        .divider {
+            margin: 25px 0 20px; display: flex; align-items: center;
+            text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 700;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .divider:not(:empty)::before { margin-right: 15px; }
+        .divider:not(:empty)::after { margin-left: 15px; }
+
+        .toggle-text { margin-top: 25px; font-size: 14px; color: rgba(255, 255, 255, 0.6); cursor: pointer; font-weight: 700; transition: 0.2s;}
+        .toggle-text:hover { color: #fff; }
+        .toggle-text span { color: var(--brand-orange); }
+        .toggle-text span:hover { text-decoration: underline; color: #FBBF24; }
+        
+        #error-msg { 
+            background: rgba(232, 28, 92, 0.1);
+            border-left: 4px solid #E81C5C;
+            padding: 12px; border-radius: 8px;
+            color: #fff; font-size: 14px; margin-bottom: 15px; 
+            font-weight: 600; display: none; line-height: 1.5; 
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-box">
+        <h2 id="auth-title">Welcome Back</h2>
+        <p id="auth-sub">Log in to manage your magical trips.</p>
+        
+        <div id="error-msg"></div>
+
+        <!-- MAIN AUTH INPUTS -->
+        <div id="main-auth-section">
+            
+            <!-- 🔥 NAYA: Name Input (Hidden by default in Login mode) 🔥 -->
+            <div class="input-group" id="name-group" style="display: none;">
+                <label>Full Name</label>
+                <input type="text" id="fullname" placeholder="e.g., Chandan Singh">
+            </div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button class="btn-auth" id="action-btn" onclick="handleAuth()">Log In</button>
+            
+            <div class="divider" id="divider">OR</div>
+            <button class="btn-google" id="google-btn" onclick="signInWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continue with Google
+            </button>
+        </div>
+
+        <!-- 🔥 OTP SECTION (HIDDEN BY DEFAULT) 🔥 -->
+        <div id="otp-section" style="display: none;">
+            <div class="input-group">
+                <label style="text-align: center;">Enter 6-Digit OTP</label>
+                <input type="text" id="otp-input" class="otp-input" placeholder="------" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <button class="btn-auth" id="verify-btn" onclick="verifyMyOtp()">Verify Account</button>
+        </div>
+        
+        <div class="toggle-text" onclick="toggleMode()">
+            <span id="toggle-hint">Don't have an account? Sign Up</span>
+        </div>
+    </div>
+
+    <!-- 🔥 JAVASCRIPT LOGIC 🔥 -->
+    <script>
+        let supabaseClient;
+        let userEmailForOtp = "";
+
+        async function initSupabase() {
+            try {
+                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const config = await res.json();
+                supabaseClient = supabase.createClient(config.url, config.key);
+            } catch (error) {
+                console.error("❌ Error loading Supabase config:", error);
+            }
+        }
+        
+        initSupabase();
+
+        let isLogin = true;
+
+        function toggleMode() {
+            isLogin = !isLogin;
+            document.getElementById('auth-title').innerText = isLogin ? "Welcome Back" : "Create Account";
+            document.getElementById('auth-sub').innerText = isLogin ? "Log in to manage your magical trips." : "Join us to plan your next adventure.";
+            document.getElementById('action-btn').innerText = isLogin ? "Log In" : "Sign Up";
+            document.getElementById('toggle-hint').innerText = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In";
+            
+            // 🔥 NAYA: Form toggle hote hi Name box show/hide karo 🔥
+            document.getElementById('name-group').style.display = isLogin ? 'none' : 'block';
+            
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.style.display = 'none';
+            document.getElementById('main-auth-section').style.display = 'block';
+            document.getElementById('otp-section').style.display = 'none';
+        }
+
+        async function handleAuth() {
+            if (!supabaseClient) return alert("Securing connection...");
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullname').value; // 🔥 NAYA: Naam fetch kiya
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.style.display = 'none';
+
+            if(!email || !password) {
+                showError("Please fill both fields.");
+                return;
+            }
+
+            // Sign Up mode mein naam bhi mandatory hai
+            if(!isLogin && !fullName) {
+                showError("Please enter your full name.");
+                return;
+            }
+
+            document.getElementById('action-btn').innerText = "Please wait...";
+
+            if (isLogin) {
+                // Email/Password Login
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    showError(error.message);
+                    document.getElementById('action-btn').innerText = "Log In";
+                } else {
+                    window.location.href = 'index2.html'; 
+                }
+            } else {
+                // 🔥 SIGN UP: Yahan Supabase mein Metadata (Name) bhej rahe hain 🔥
+                const { data, error } = await supabaseClient.auth.signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName // Database mein naam save ho jayega
+                        }
+                    }
+                });
+
+                if (error) {
+                    showError(error.message);
+                    document.getElementById('action-btn').innerText = "Sign Up";
+                } else {
+                    userEmailForOtp = email;
+                    document.getElementById('main-auth-section').style.display = 'none';
+                    document.getElementById('otp-section').style.display = 'block';
+                    
+                    errorMsg.style.borderLeftColor = '#34D399'; 
+                    errorMsg.style.background = 'rgba(52, 211, 153, 0.1)'; 
+                    errorMsg.innerHTML = `✅ <b>OTP sent to ${email}!</b><br>Please enter the 6-digit code below.`;
+                    errorMsg.style.display = 'block';
+                }
+            }
+        }
+
+        function showError(msg) {
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.style.borderLeftColor = '#E81C5C'; 
+            errorMsg.style.background = 'rgba(232, 28, 92, 0.1)';
+            errorMsg.innerText = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        async function verifyMyOtp() {
+            const otpCode = document.getElementById('otp-input').value;
+            if(otpCode.length !== 6) return showError("Please enter a valid 6-digit OTP.");
+
+            document.getElementById('verify-btn').innerText = "Verifying...";
+            const { data, error } = await supabaseClient.auth.verifyOtp({ email: userEmailForOtp, token: otpCode, type: 'signup' });
+
+            if (error) {
+                showError("❌ Invalid OTP! Please try again.");
+                document.getElementById('verify-btn').innerText = "Verify Account";
+            } else {
+                const errorMsg = document.getElementById('error-msg');
+                errorMsg.style.borderLeftColor = '#34D399'; errorMsg.style.background = 'rgba(52, 211, 153, 0.1)'; 
+                errorMsg.innerHTML = "✅ Account Verified Successfully!";
+                setTimeout(() => window.location.href = 'index2.html', 1000);
+            }
+        }
+
+        async function signInWithGoogle() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/index2.html' } });
+            if (error) showError(error.message);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Trips | TravelGenieAi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* 🔥 PREMIUM WATER GLASS THEME VARIABLES 🔥 */
+        :root {
+            --brand-orange: #F59E0B;
+            --brand-red: #E81C5C;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; padding: 0;
+            background: linear-gradient(rgba(17, 53, 52, 0.4), rgba(17, 53, 52, 0.6)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* 🔥 GLASSMORPHISM NAVBAR 🔥 */
+        nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 18px 40px; 
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 24px; font-weight: 800; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);}
+        .nav-btns { display: flex; gap: 15px; }
+        .btn-logout { background: rgba(232, 28, 92, 0.1); border: 1px solid var(--brand-red); color: #fff; padding: 8px 24px; border-radius: 14px; cursor: pointer; font-weight: 700; transition: 0.3s; }
+        .btn-logout:hover { background: var(--brand-red); box-shadow: 0 4px 15px rgba(232, 28, 92, 0.4);}
+        .btn-home { background: var(--brand-orange); border: none; color: #111; padding: 8px 24px; border-radius: 14px; cursor: pointer; font-weight: 800; transition: 0.3s; }
+        .btn-home:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4); }
+
+        /* 🔥 DASHBOARD LAYOUT 🔥 */
+        .container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
+        .header { margin-bottom: 50px; text-align: center; }
+        .header h1 { font-size: 46px; margin: 0 0 10px; font-weight: 800; text-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+        .header p { color: rgba(255,255,255,0.8); font-size: 18px; margin: 0; font-weight: 500;}
+
+        /* 🔥 GLASS GRID & CARDS 🔥 */
+        .trips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 35px; }
+        .trip-card {
+            background: rgba(255, 255, 255, 0.08); /* Translucent Glass */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 26px; 
+            overflow: hidden; 
+            transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            cursor: pointer; 
+            display: flex; flex-direction: column;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+        .trip-card:hover { 
+            transform: translateY(-10px); 
+            background: rgba(255, 255, 255, 0.12); 
+            border-color: rgba(255, 255, 255, 0.4); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4); 
+        }
+
+        /* 🔥 LIVE SLIDESHOW CSS 🔥 */
+        .tc-img { height: 200px; background: rgba(0,0,0,0.3); position: relative; overflow: hidden; border-radius: 26px 26px 0 0;}
+        
+        .slide-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            opacity: 0; animation: fadeSlide 12s infinite ease-in-out; transition: 0.5s;
+        }
+        .trip-card:hover .slide-img { transform: scale(1.08); } /* Hover par cinematic zoom */
+        
+        .slide-img:nth-child(1) { animation-delay: 0s; }
+        .slide-img:nth-child(2) { animation-delay: 4s; }
+        .slide-img:nth-child(3) { animation-delay: 8s; }
+
+        @keyframes fadeSlide {
+            0%   { opacity: 1; }
+            25%  { opacity: 1; }
+            33%  { opacity: 0; }
+            92%  { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .tc-badge { 
+            position: absolute; top: 15px; right: 15px; 
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); 
+            padding: 8px 16px; border-radius: 20px; 
+            font-size: 13px; font-weight: 800; color: var(--brand-orange); 
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+        
+        /* Glass Delete Button */
+        .btn-delete-trip {
+            position: absolute; top: 15px; left: 15px; 
+            background: rgba(232, 28, 92, 0.7); backdrop-filter: blur(8px);
+            color: white; border: 1px solid rgba(255,255,255,0.3);
+            width: 38px; height: 38px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: 0.3s; z-index: 10;
+        }
+        .btn-delete-trip:hover { background: var(--brand-red); transform: scale(1.15) rotate(5deg); box-shadow: 0 4px 15px rgba(232, 28, 92, 0.5); }
+
+        .tc-body { padding: 25px; flex: 1; display: flex; flex-direction: column; }
+        .tc-dest { font-size: 24px; font-weight: 800; margin: 0 0 8px; color: #fff;}
+        .tc-origin { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 25px; display: flex; align-items: center; gap: 6px; font-weight: 600;}
+        .tc-details { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .tc-detail-item { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); display: flex; align-items: center; gap: 6px; }
+        
+        /* 🔥 LOADER & EMPTY STATE 🔥 */
+        #loader { text-align: center; padding: 100px 0; color: var(--brand-orange); font-size: 22px; font-weight: 800; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        #empty-state { text-align: center; padding: 80px 0; display: none; background: rgba(255,255,255,0.05); border-radius: 30px; border: 1px dashed rgba(255,255,255,0.2); backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
+        #empty-state h2 { font-size: 34px; margin-bottom: 10px; font-weight: 800; }
+        #empty-state p { color: rgba(255,255,255,0.7); margin-bottom: 30px; font-size: 18px; font-weight: 500;}
+        .btn-start { background: var(--brand-orange); color: #111; border: none; padding: 15px 40px; border-radius: 14px; font-size: 18px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(245, 158, 11, 0.5); }
+
+        /* 🔥 PREMIUM GLASS DELETE MODAL 🔥 */
+        .delete-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px);
+            z-index: 9999; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .delete-modal-box {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px; padding: 45px 35px; width: 90%; max-width: 420px;
+            text-align: center; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            transform: scale(0.95); animation: scaleUp 0.3s ease forwards;
+        }
+        .delete-modal-box h2 { font-size: 26px; margin: 0 0 12px; color: #fff; font-weight: 800;}
+        .delete-modal-box p { color: rgba(255,255,255,0.8); font-size: 16px; margin-bottom: 35px; line-height: 1.6; font-weight: 500;}
+        .dm-actions { display: flex; gap: 15px; justify-content: center; }
+        .dm-btn-cancel { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 14px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; flex: 1; }
+        .dm-btn-cancel:hover { background: rgba(255,255,255,0.2); }
+        .dm-btn-delete { background: var(--brand-red); border: none; color: white; padding: 14px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; flex: 1; box-shadow: 0 6px 15px rgba(232, 28, 92, 0.4); }
+        .dm-btn-delete:hover { background: #D01550; transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index2.html" class="logo">⛺ TravelGenie<span style="color:var(--brand-orange)">Ai</span></a>
+        <div class="nav-btns">
+            <button class="btn-home" onclick="window.location.href='index2.html'">Plan New Trip</button>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>My Magical Vault ✨</h1>
+            <p>Your personal collection of AI-generated travel itineraries.</p>
+        </div>
+
+        <div id="loader">Unlocking your vault... ⏳</div>
+
+        <div id="empty-state">
+            <h2>No trips found! 🏜️</h2>
+            <p>Looks like you haven't planned any adventures yet.</p>
+            <button class="btn-start" onclick="window.location.href='index2.html'">Start Exploring Now</button>
+        </div>
+
+        <div class="trips-grid" id="trips-container">
+            </div>
+    </div>
+
+    <div class="delete-modal-overlay" id="custom-delete-modal">
+        <div class="delete-modal-box">
+            <div style="font-size: 50px; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">🗑️</div>
+            <h2>Delete Trip?</h2>
+            <p>Are you sure you want to delete this trip? This magical journey will be lost forever.</p>
+            <div class="dm-actions">
+                <button class="dm-btn-cancel" onclick="closeDeleteModal(event)">Cancel</button>
+                <button class="dm-btn-delete" id="confirm-delete-btn" onclick="executeDelete(event)">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let supabaseClient;
+
+        async function init() {
+            try {
+                // Backend se securely keys lana
+                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const config = await res.json();
+                supabaseClient = supabase.createClient(config.url, config.key);
+                checkAuthAndFetchTrips();
+            } catch (error) {
+                console.error("Error loading config:", error);
+                document.getElementById('loader').innerText = "⚠️ Error connecting to server. Is backend running?";
+            }
+        }
+
+        async function checkAuthAndFetchTrips() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html'; 
+                return;
+            }
+
+            const userId = session.user.id;
+            
+            // Fetch trips
+            const { data, error } = await supabaseClient
+                .from('trips')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            document.getElementById('loader').style.display = 'none';
+
+            if (error) {
+                alert("Failed to fetch trips. Please try again.");
+                return;
+            }
+
+            if (data.length === 0) {
+                document.getElementById('empty-state').style.display = 'block';
+            } else {
+                renderTrips(data);
+            }
+        }
+
+        // 🔥 NAYA: SECURE BACKEND SE UNSPLASH IMAGES LANA 🔥
+        async function getImagesForDestination(dest) {
+            try {
+                const query = dest.split(',')[0].trim();
+                const res = await fetch(`http://localhost:5000/api/images?dest=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                
+                if (data.success && data.images && data.images.length >= 3) {
+                    return data.images;
+                }
+            } catch (error) {
+                console.error("Backend image error:", error);
+            }
+            // Fallback Images agar Unsplash API limit cross ho jaye
+            return [
+                "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+                "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80",
+                "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80"
+            ];
+        }
+
+        // 🔥 NAYA: PARALLEL FETCHING & SLIDESHOW INJECTION 🔥
+        async function renderTrips(trips) {
+            const container = document.getElementById('trips-container');
+            container.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.8); padding: 40px; font-weight: 800; font-size: 18px; width: 100%; grid-column: 1 / -1;">⏳ Loading your Dashboard...</div>';
+
+            // Promise.all se saari images ek sath fetch hongi (Rocket speed!)
+            const tripsHTMLPromises = trips.map(async (trip) => {
+                const dateObj = new Date(trip.created_at);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                const dest = trip.destination ? trip.destination.split(',')[0] : "Mystery Place";
+                const origin = trip.origin ? trip.origin.split(',')[0] : "Unknown Origin";
+                const limit = trip.budget_limit || 'Standard';
+
+                // 🔥 Har destination ke liye 3 real images fetch ho rahi hain 🔥
+                const selectedImages = await getImagesForDestination(dest);
+
+                return `
+                    <div class="trip-card" onclick="window.location.href='itinerary.html?id=${trip.id}'">
+                        <div class="tc-img">
+                            <img src="${selectedImages[0]}" class="slide-img" alt="Slide 1">
+                            <img src="${selectedImages[1]}" class="slide-img" alt="Slide 2">
+                            <img src="${selectedImages[2]}" class="slide-img" alt="Slide 3">
+                            
+                            <div class="tc-badge">${limit}</div>
+                            <button class="btn-delete-trip" onclick="deleteTrip('${trip.id}', event)" title="Delete Trip">🗑️</button>
+                        </div>
+                        <div class="tc-body">
+                            <h3 class="tc-dest">${dest}</h3>
+                            <div class="tc-origin">🛫 From: ${origin}</div>
+                            <div class="tc-details">
+                                <div class="tc-detail-item">📅 ${trip.timing || 'Flexible'}</div>
+                                <div class="tc-detail-item">🕒 ${formattedDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Ek baar me saare cards inject kar do
+            const tripsCards = await Promise.all(tripsHTMLPromises);
+            container.innerHTML = tripsCards.join('');
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index2.html';
+        }
+        
+        let tripIdToDelete = null;
+
+        function deleteTrip(tripId, event) {
+            event.stopPropagation(); 
+            tripIdToDelete = tripId; 
+            document.getElementById('custom-delete-modal').style.display = 'flex';
+        }
+
+        function closeDeleteModal(event) {
+            if(event) event.stopPropagation();
+            document.getElementById('custom-delete-modal').style.display = 'none';
+            tripIdToDelete = null;
+        }
+
+        async function executeDelete(event) {
+            event.stopPropagation();
+            if (!tripIdToDelete) return;
+
+            const btn = document.getElementById('confirm-delete-btn');
+            btn.innerHTML = "⏳ Deleting...";
+            btn.style.pointerEvents = "none";
+
+            try {
+                const { error } = await supabaseClient
+                    .from('trips')
+                    .delete()
+                    .eq('id', tripIdToDelete);
+
+                if (error) throw error;
+                closeDeleteModal(); 
+                checkAuthAndFetchTrips(); 
+
+            } catch (error) {
+                console.error("❌ Error deleting trip:", error);
+                alert("Failed to delete the trip. Please try again.");
+            } finally {
+                btn.innerHTML = "Yes, Delete";
+                btn.style.pointerEvents = "auto";
+            }
+        }
+
+        init(); 
+    </script>
+</body>
+</html>
