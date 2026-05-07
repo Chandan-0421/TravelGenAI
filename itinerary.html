@@ -1233,15 +1233,23 @@
                         budgetHTML += `<div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); font-size: 15px; color: #4a5568; line-height: 1.8;">${marked.parse(dayWiseText)}</div>`;
                     }
 
-                    if (isOverBudget && !isImpossible) {
+                 if (isOverBudget && !isImpossible) {
+                        // JS Calculator: Exact extra amount nikalenge
+                        let extraAmount = calculatedGrandTotal - numericLimit;
+                        
                         budgetHTML += `<div style="background: rgba(232, 28, 92, 0.08); padding: 24px; border-radius: 16px; border-left: 5px solid var(--brand-red);">
                         <h3 style="color: var(--brand-red); margin: 0 0 10px 0; font-family: 'Plus Jakarta Sans'; font-size: 20px;">⚠️ Over Budget Alert!</h3>
-                        <p style="font-weight: 600; margin-bottom: 15px; color: #111; font-size: 15px;">Smart AI Suggestions to save money:</p>
-                        <div style="font-size: 15px; line-height: 1.6; color: #4a5568;">${marked.parse(optimizerText)}</div>
+                        <p style="font-weight: 600; margin-bottom: 15px; color: #111; font-size: 15px;">Your estimated cost exceeds the budget by <span style="color: var(--brand-red);">₹${extraAmount.toLocaleString('en-IN')}</span>. Smart ways to save money:</p>
+                        <ul style="font-size: 15px; line-height: 1.6; color: #4a5568; padding-left: 20px; margin-top: 10px;">
+                            <li style="margin-bottom: 8px;"><b>Transport:</b> Opt for sleeper class trains or overnight buses instead of flights/cabs.</li>
+                            <li style="margin-bottom: 8px;"><b>Stay:</b> Look for highly-rated hostels, homestays, or budget hotels slightly away from the main tourist hubs.</li>
+                            <li><b>Activities:</b> Eat at local popular street joints and prioritize free natural viewpoints or walking tours.</li>
+                        </ul>
                     </div>`;
                     } else if (!isOverBudget && !isImpossible) {
+                        // Success message with exact calculated amount
                         budgetHTML += `<div style="background: rgba(23, 79, 39, 0.08); padding: 20px 24px; border-radius: 12px; border-left: 5px solid var(--green-mid); color: var(--green-mid); font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 24px;">✅</span> Great! Your trip is well within your budget limit.
+                        <span style="font-size: 24px;">✅</span> Great! Your trip is under budget. You are saving ₹${(numericLimit - calculatedGrandTotal).toLocaleString('en-IN')}!
                     </div>`;
                     }
 
@@ -1250,6 +1258,7 @@
                 } else {
                     document.getElementById('itinerary-cards-container').innerHTML = '<div class="glass-card"><h2 style="color:red;">Error loading trip.</h2></div>';
                 }
+                
             } catch (error) {
                 console.error(error);
                 document.getElementById('loader').style.display = 'none';
@@ -1257,6 +1266,7 @@
                 document.getElementById('itinerary-cards-container').innerHTML = '<div class="glass-card"><h2 style="color:red;">Server Connection Failed</h2><p>Please check if the Node backend is running.</p></div>';
             }
         };
+        //download PDF
 
         function downloadPDF() {
             const btn = document.getElementById('pdf-btn');

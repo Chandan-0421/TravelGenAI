@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | TravelGenieAi</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS is required for Navbar Login state -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* =======================================================
+           1. BASE THEME VARIABLES & RESET
+        ======================================================= */
+        :root {
+            /* Shared Nav Colors */
+            --green-mid: #174F27;
+            --cream: #F9EDDD;
+            --yellow: #FFE093;
+            --brand-red: #E81C5C;
+            --brand-orange: #F59E0B;
+            --green-glow: #22c55e;
+            --text-light: #F9FAFB;
+            --text-muted: #D1D5DB;
+            
+            /* Premium Dark Glass Variables */
+            --glass-bg: rgba(20, 25, 30, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(rgba(10, 15, 20, 0.6), rgba(10, 15, 20, 0.8)), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* =======================================================
+           2. NAVBAR CSS (Imported from Homepage)
+        ======================================================= */
+        nav { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); width: min(1200px, calc(100% - 40px)); background: var(--cream); border-radius: 12px; padding: 0 28px; height: 70px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 8px 32px rgba(17, 53, 52, 0.18); backdrop-filter: blur(12px); transition: all 0.3s ease; }
+        .logo { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 22px; color: var(--green-mid); display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .logo-icon { width: 36px; height: 36px; background: var(--green-mid); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--yellow); font-size: 18px; transition: transform 0.3s; }
+        .logo:hover .logo-icon { transform: rotate(15deg) scale(1.1); }
+        
+        .nav-links { display: flex; gap: 70px; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { font-size: 15px; font-weight: 700; color: var(--green-mid); text-decoration: none; position: relative; padding: 4px 0; letter-spacing: 0.3px; }
+        .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2.5px; background: var(--brand-red); transition: width 0.3s; border-radius: 4px; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        
+        .nav-btns { display: flex; gap: 12px; align-items: center; }
+        .btn-login { padding: 10px 24px; border: 1.5px solid var(--green-mid); border-radius: 10px; background: transparent; color: var(--green-mid); font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-login:hover { background: var(--green-mid); color: white; }
+        .btn-signup { padding: 10px 24px; border-radius: 10px; background: var(--yellow); border: none; color: var(--green-mid); font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 224, 147, 0.5); }
+        .btn-signup:hover { background: #f5d163; transform: translateY(-2px); }
+
+        @media (max-width: 768px) { nav { display: none; } } /* Hide nav on mobile like homepage */
+
+        /* =======================================================
+           3. PREMIUM DARK GLASS UTILITY
+        ======================================================= */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            color: var(--text-light);
+            overflow: hidden;
+        }
+
+        /* =======================================================
+           4. ABOUT SECTION LAYOUT
+        ======================================================= */
+        .about-container {
+            max-width: 1200px;
+            /* 🔥 Margin Top increased to 120px to prevent hiding behind Navbar 🔥 */
+            margin: 120px auto 60px;
+            padding: 0 20px;
+        }
+
+        .about-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .about-header h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 52px;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .about-header h1 span {
+            color: var(--brand-orange);
+        }
+
+        .about-header p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .about-card {
+            padding: 40px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .about-card h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--brand-orange);
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+
+        .about-card p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 25px;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s ease;
+        }
+
+        .feature-list li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-list li span {
+            font-size: 22px;
+            background: rgba(245, 158, 11, 0.15);
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        /* =======================================================
+           5. MEET THE TEAM SECTION
+        ======================================================= */
+        .team-section-title {
+            text-align: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 36px;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .team-card {
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-orange);
+            padding: 4px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+
+        .team-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .team-role {
+            color: var(--brand-orange);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .team-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .about-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto 50px; }
+        }
+
+        @media (max-width: 600px) {
+            .about-header h1 { font-size: 40px; }
+            .about-card { padding: 25px; }
+            .about-container { margin-top: 60px; } /* Navbar hidden on mobile */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔥 YOUR NEW NAVBAR 🔥 -->
+    <nav id="mainNav">
+        <!-- Make sure to link back to your homepage (e.g., index.html) -->
+        <a href="index.html" class="logo"><span class="logo-icon">⛺</span>TravelGenie<span style="color:var(--brand-red)">Ai</span></a>
+
+        <ul class="nav-links">
+            <li><a href="index2.html">Home</a></li>
+            <li><a href="#" class="active">About AI</a></li>
+        </ul>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="nav-btns" id="nav-auth-section" style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+                <button class="btn-signup" onclick="window.location.href='login.html'">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN ABOUT CONTENT -->
+    <section class="about-container">
+        <div class="about-header">
+            <h1>About <span>TravelGenieAi</span></h1>
+            <p>Built by passionate students. We turn your travel dreams into perfectly optimized, budget-friendly realities using the power of Artificial Intelligence.</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="glass-panel about-card">
+                <h2>📖 Our Mission</h2>
+                <p>As engineering students, we realized that planning a trip with friends is often more exhausting than the trip itself. Comparing routes, finding cheap stays, and managing a tight college budget takes the joy out of traveling.</p>
+                <p><strong>TravelGenieAi</strong> is our final year vision to solve this. By integrating advanced Large Language Models (LLMs), we built a platform that acts as your personal, hyper-intelligent local guide.</p>
+                <p>It doesn't just list places—it computes live math, checks realistic budgets, and creates a seamless door-to-door itinerary.</p>
+            </div>
+
+            <div class="glass-panel about-card">
+                <h2>✨ Why It's Special</h2>
+                <p>We engineered this platform to be transparent, smart, and fully dynamic.</p>
+                <ul class="feature-list">
+                    <li><span>💰</span> <strong>Smart Math Engine:</strong> No fake prices, 100% budget accuracy.</li>
+                    <li><span>🗺️</span> <strong>Door-to-Door Routing:</strong> From your home station to the destination.</li>
+                    <li><span>🤖</span> <strong>Multi-Model AI:</strong> Built-in fallback system for zero downtime.</li>
+                    <li><span>🌐</span> <strong>Multi-Lingual:</strong> Generates plans in English, Hindi, and Marathi.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2 class="team-section-title">Meet the Brains Behind It</h2>
+        
+        <div class="team-grid">
+            <div class="glass-panel team-card">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Chandan&backgroundColor=b6e3f4" alt="Chandan Singh" class="team-avatar">
+                <h3 class="team-name">Chandan Singh</h3>
+                <h4 class="team-role">Lead Full-Stack Developer</h4>
+                <p>Handled the core architecture, MERN stack integration, and the complex AI prompt engineering to ensure seamless itinerary generation.</p>
+            </div>
+
+            <div class="glass-panel team-card">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul&backgroundColor=c0aede" alt="Team Member 2" class="team-avatar">
+                <h3 class="team-name">[Friend's Name]</h3>
+                <h4 class="team-role">Frontend & UI/UX Designer</h4>
+                <p>Designed the smooth, responsive glassmorphism interfaces and ensured the user experience is flawless across all devices.</p>
+            </div>
+
+            <div class="glass-panel team-card">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya&backgroundColor=ffdfbf" alt="Team Member 3" class="team-avatar">
+                <h3 class="team-name">[Friend's Name]</h3>
+                <h4 class="team-role">Database & API Integration</h4>
+                <p>Managed the Supabase backend, user authentication, and third-party map/weather API connections to keep data real-time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 SUPABASE AUTH LOGIC (So navbar shows correct login state) 🔥 -->
+    <script>
+        let supabaseClient;
+        window.currentUserId = null;
+
+        async function initSupabase() {
+            try {
+                // Adjust this endpoint if your backend URL is different
+                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const config = await res.json();
+                supabaseClient = supabase.createClient(config.url, config.key);
+                checkUserAuth();
+            } catch (error) {
+                console.error("❌ Error loading Supabase config:", error);
+            }
+        }
+
+        async function checkUserAuth() {
+            if (!supabaseClient) return;
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const authSection = document.getElementById('nav-auth-section');
+            
+            if (session && session.user) {
+                window.currentUserId = session.user.id;
+                
+                let displayName = session.user.user_metadata?.full_name 
+                                  || session.user.user_metadata?.name 
+                                  || session.user.email.split('@')[0];
+                
+                authSection.innerHTML = `
+                  <span style="font-weight:700; color:var(--green-mid); display:flex; align-items:center; margin-right:10px;">👋 Hi, ${displayName}</span>
+                  <button class="btn-login" onclick="window.location.href='dashboard.html'" style="background:var(--green-mid); color:white;">My Trips</button>
+                  <button class="btn-login" onclick="logoutUser()" style="border-color:var(--brand-red); color:var(--brand-red);">Logout</button>
+                `;
+            } else {
+                window.currentUserId = null;
+                authSection.innerHTML = `
+                  <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+                  <button class="btn-signup" onclick="window.location.href='login.html'">Sign Up</button>
+                `;
+            }
+        }
+
+        async function logoutUser() {
+            if(supabaseClient) {
+                await supabaseClient.auth.signOut();
+                window.location.reload();
+            }
+        }
+
+        initSupabase();
+    </script>
+</body>
+</html>
