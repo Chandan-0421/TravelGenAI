@@ -303,7 +303,6 @@
             background: var(--cream);
             color: var(--green-mid);
             padding-left: 22px;
-            /* Smooth hover slide animation */
         }
 
 
@@ -1025,23 +1024,6 @@
 
         <div style="display: flex; align-items: center; gap: 16px;">
 
-            <!-- <div class="lang-dropdown-container" onclick="this.classList.toggle('active')">
-                <div class="lang-selected" id="lang-display">🇬🇧 English</div>
-                <div class="lang-options">
-                    <div onclick="selectLang('English', '🇬🇧 English')">🇬🇧 English</div>
-                    <div onclick="selectLang('Hindi', '🇮🇳 Hindi')">🇮🇳 Hindi</div>
-                    <div onclick="selectLang('Marathi', '🚩 Marathi')">🚩 Marathi</div>
-                    <div onclick="selectLang('Hinglish', '😎 Hinglish (Gen-Z)')">😎 Hinglish (Gen-Z)</div>
-                </div>
-            </div>
-
-            <select id="trip-language" style="display: none;">
-                <option value="English" selected>English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Marathi">Marathi</option>
-                <option value="Hinglish">Hinglish</option>
-            </select> -->
-
             <div class="nav-btns" id="nav-auth-section" style="display: flex; align-items: center; gap: 12px;">
                 <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
                 <button class="btn-signup" onclick="window.location.href='login.html'">Sign Up</button>
@@ -1345,10 +1327,6 @@
             if (session && session.user) {
                 window.currentUserId = session.user.id;
 
-                // 🔥 NAYA LOGIC: Supabase Metadata se Asli Naam Nikalna 🔥
-                // 1. Pehle check karega form se aaya 'full_name'
-                // 2. Agar nahi mila toh Google se aaya 'name'
-                // 3. Agar kuch nahi mila (jaise purane accounts), toh email ka pehla hissa (Fallback)
                 let displayName = session.user.user_metadata?.full_name
                     || session.user.user_metadata?.name
                     || session.user.email.split('@')[0];
@@ -1394,7 +1372,7 @@
         } catch (e) { }
 
         /* -----------------------------------------------------------
-           2. DYNAMIC CALENDAR AUTO-GENERATOR
+           2. DYNAMIC CALENDAR AUTO-GENERATOR (🔥 REVERSE DATE FIX 🔥)
         ----------------------------------------------------------- */
         function generateCalendar() {
             const today = new Date();
@@ -1427,9 +1405,12 @@
                 for (let i = 1; i <= daysInMonth; i++) {
                     let isDisabled = isCurrentMonth && (i < currentDate);
                     let classNames = isDisabled ? "cal-day disabled" : "cal-day";
-                    let clickEvent = isDisabled ? "" : `onclick="selectDateRange(this, '${i} ${monthNames[month].substring(0, 3)}', '${monthPrefix}-${i}')"`;
+                    
+                    // Naya Timestamp logic add kiya (taaki dates compare ho sakein)
+                    let cellTimestamp = new Date(year, month, i).getTime();
+                    let clickEvent = isDisabled ? "" : `onclick="selectDateRange(this, '${i} ${monthNames[month].substring(0, 3)}', '${monthPrefix}-${i}', ${cellTimestamp})"`;
 
-                    html += `<div class="cal-day-cell" id="cell-${monthPrefix}-${i}">
+                    html += `<div class="cal-day-cell" id="cell-${monthPrefix}-${i}" data-time="${cellTimestamp}">
                           <div class="${classNames}" ${clickEvent}>${i}</div>
                        </div>`;
                 }
@@ -1448,7 +1429,7 @@
         generateCalendar();
 
         /* -----------------------------------------------------------
-           3. DROPDOWN LOGIC & LIVE AUTO-SUGGEST (NEW FEATURE! 🔥)
+           3. DROPDOWN LOGIC & LIVE AUTO-SUGGEST
         ----------------------------------------------------------- */
         const searchFields = document.querySelectorAll('.search-field');
         searchFields.forEach(field => {
@@ -1481,7 +1462,6 @@
         const originInput = document.getElementById('val-origin');
         const whereInput = document.getElementById('val-where');
 
-        // Save default menus so we can restore them if input is empty
         const defaultOriginMenu = document.querySelector('#sf-origin .dropdown-menu').innerHTML;
         const defaultWhereMenu = document.querySelector('#sf-where .dropdown-menu').innerHTML;
 
@@ -1494,14 +1474,12 @@
             dropdownEl.innerHTML = `<div class="dd-title">Searching places... ⏳</div>`;
 
             try {
-                // OpenStreetMap Free Search API
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
                 const data = await res.json();
 
                 if (data && data.length > 0) {
                     let html = `<div class="dd-title">Suggested Places</div>`;
                     data.forEach(item => {
-                        // Make location name clean (e.g. "Nagpur, Maharashtra, India")
                         let parts = item.display_name.split(',');
                         let cleanName = parts.slice(0, 3).join(', ').trim();
                         let safeName = cleanName.replace(/'/g, "\\'");
@@ -1527,16 +1505,14 @@
             }
         }
 
-        // Trigger search when typing in Origin
         originInput.addEventListener('input', (e) => {
             clearTimeout(typingTimer);
             const dropdown = document.querySelector('#sf-origin .dropdown-menu');
             typingTimer = setTimeout(() => {
                 fetchLocations(e.target.value.trim(), dropdown, true);
-            }, 500); // 500ms delay to prevent spamming API
+            }, 500); 
         });
 
-        // Trigger search when typing in Destination
         whereInput.addEventListener('input', (e) => {
             clearTimeout(typingTimer);
             const dropdown = document.querySelector('#sf-where .dropdown-menu');
@@ -1546,7 +1522,7 @@
         });
 
         /* -----------------------------------------------------------
-           4. DATE, FLEX & GUEST LOGIC
+           4. DATE, FLEX & GUEST LOGIC (🔥 UPDATED SELECTION LOGIC 🔥)
         ----------------------------------------------------------- */
         let startDate = null;
         let endDate = null;
@@ -1566,23 +1542,50 @@
             }
         }
 
-        function selectDateRange(elem, dateStr, cellId) {
+        function selectDateRange(elem, dateStr, cellId, timestamp) {
             if (!startDate || (startDate && endDate)) {
                 document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
                 document.querySelectorAll('.cal-day-cell').forEach(el => el.classList.remove('in-range', 'range-start', 'range-end'));
-                startDate = { elem, dateStr, cellId };
+                
+                startDate = { elem, dateStr, cellId, timestamp };
                 endDate = null;
                 elem.classList.add('selected');
                 document.getElementById('cell-' + cellId).classList.add('range-start');
                 document.getElementById('val-when').innerText = dateStr;
             } else {
-                endDate = { elem, dateStr, cellId };
+                // BUG FIX: Reverse Date (peeche ki date) click karne par
+                if (timestamp < startDate.timestamp) {
+                    document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+                    document.querySelectorAll('.cal-day-cell').forEach(el => el.classList.remove('in-range', 'range-start', 'range-end'));
+                    
+                    startDate = { elem, dateStr, cellId, timestamp };
+                    elem.classList.add('selected');
+                    document.getElementById('cell-' + cellId).classList.add('range-start');
+                    document.getElementById('val-when').innerText = dateStr;
+                    return;
+                }
+
+                endDate = { elem, dateStr, cellId, timestamp };
                 elem.classList.add('selected');
                 document.getElementById('cell-' + cellId).classList.add('range-end');
                 document.getElementById('val-when').innerText = `${startDate.dateStr} - ${endDate.dateStr}`;
-                document.getElementById('sf-when').classList.remove('active');
+                
+                // BONUS: Beech ki dates ko highlight karna
+                document.querySelectorAll('.cal-day-cell').forEach(cell => {
+                    let timeAttr = cell.getAttribute('data-time');
+                    if (timeAttr) {
+                        let cellTime = parseInt(timeAttr);
+                        if (cellTime > startDate.timestamp && cellTime < endDate.timestamp) {
+                            cell.classList.add('in-range');
+                        }
+                    }
+                });
+
+                setTimeout(() => {
+                    document.getElementById('sf-when').classList.remove('active');
+                }, 300);
             }
-            document.getElementById('val-when').style.color = '#1a1a1a';
+            document.getElementById('val-when').style.color = '#1a1a1a'; 
         }
 
         let flexLength = "Weekend";
@@ -1675,7 +1678,6 @@
              6. LLM DATA COMPILER & PENDING SEARCH HANDLER 🔥
           ----------------------------------------------------------- */
         function generateLLMPrompt() {
-            // 1. Sabse pehle input ki values utha lo
             const origin = document.getElementById('val-origin').value.trim();
             const loc = document.getElementById('val-where').value.trim();
             const timing = document.getElementById('val-when').innerText;
@@ -1687,9 +1689,7 @@
                 return;
             }
 
-            // 2. 🔥 LOGIN CHECK AUR PENDING DATA SAVE 🔥
             if (!window.currentUserId) {
-                // Yahan string (whoText) aur actual object (guests) dono save karenge
                 let tripData = { origin: origin, destination: loc, dates: timing, guestsText: whoText, guestsObj: guests, budget: budget };
                 localStorage.setItem('savedPendingTrip', JSON.stringify(tripData));
 
@@ -1697,24 +1697,20 @@
                 return;
             }
 
-            // 3. Agar User Logged in hai
             const llmData = {
                 "origin": origin !== "" ? origin : "Not Specified",
                 "destination": loc !== "" ? loc : "Not Specified",
                 "timing": timing !== "Add dates" ? timing : "Anytime",
-                "guests": guests, // 🔥 FIX: Yahan 'whoText' ki jagah proper 'guests' object bhej diya
+                "guests": guests,
                 "budget_limit": budget !== "" ? budget : "Standard",
                 "user_id": window.currentUserId,
                 "language": document.getElementById('trip-language') ? document.getElementById('trip-language').value : "English"
             };
 
-            // 4. Main Itinerary Data ko local storage mein save karo
             localStorage.setItem('travelGenieRequest', JSON.stringify(llmData));
 
-            // 5. Button par loading spinner dikhao
             document.querySelector('.search-btn').innerHTML = `<div style="width:20px; height:20px; border:3px solid white; border-top:3px solid transparent; border-radius:50%; animation: spin 1s linear infinite;"></div>`;
 
-            // 6. Naye UI wale page par redirect
             setTimeout(() => {
                 window.location.href = 'itinerary.html';
             }, 800);
@@ -1736,7 +1732,6 @@
                     document.getElementById('val-when').innerText = parsedData.dates;
                 }
 
-                // 🔥 FIX: Guests ka text UI mein aur actual object background mein dono restore karo
                 if (parsedData.guestsText && parsedData.guestsText !== "Add guests") {
                     document.getElementById('val-who').innerText = parsedData.guestsText;
                 }
@@ -1745,7 +1740,6 @@
                     guests.child = parsedData.guestsObj.child || 0;
                     guests.infant = parsedData.guestsObj.infant || 0;
 
-                    // Dropdown ke +, - counters ko bhi update kar do
                     document.getElementById('count-adult').innerText = guests.adult;
                     document.getElementById('count-child').innerText = guests.child;
                     document.getElementById('count-infant').innerText = guests.infant;

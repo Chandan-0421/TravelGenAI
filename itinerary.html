@@ -25,17 +25,68 @@
             --bg-glass: rgba(255, 255, 255, 0.95);
         }
 
-        body {
+       body {
             font-family: 'DM Sans', sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            background: linear-gradient(rgba(17, 53, 52, 0.80), rgba(17, 53, 52, 0.90)), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') no-repeat center center fixed;
-            background-size: cover;
             color: var(--text-dark);
             display: flex;
             flex-direction: column;
+            background: var(--green-dark); /* Fallback color */
+        }
+
+        /* 🔥 NAYA BACKGROUND SLIDER CSS 🔥 */
+        .bg-slider {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: #000;
+        }
+
+        .bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            /* 20 seconds ka loop, 4 images hain toh har ek 5 second visible rahegi */
+            animation: fadeZoom 20s infinite;
+        }
+
+        /* 4 Premium Travel Images (Mountains, Beach, City, Forest) */
+        .bg-slide-1 { background-image: url('https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=1920&q=80'); animation-delay: 0s; }
+        .bg-slide-2 { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'); animation-delay: 5s; }
+        .bg-slide-3 { background-image: url('https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=1920&q=80'); animation-delay: 10s; }
+        .bg-slide-4 { background-image: url('https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1920&q=80'); animation-delay: 15s; }
+        .bg-slide-4 { background-image: url('https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1920&q=80'); animation-delay: 20s; }
+        .bg-slide-4 { background-image: url('https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80'); animation-delay: 25s; }
+
+        @keyframes fadeZoom {
+            0% { opacity: 0; transform: scale(1.05); }
+            10% { opacity: 1; }
+            25% { opacity: 1; }
+            35% { opacity: 0; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            /* Wahi mast deep green overlay taaki text perfectly padhne mein aaye */
+            background: linear-gradient(rgba(17, 53, 52, 0.60), rgba(17, 53, 52, 0.85));
+            pointer-events: none;
         }
 
         nav {
@@ -671,6 +722,8 @@
             break-inside: avoid-page !important;
             display: block;
         }
+
+        
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -688,9 +741,14 @@
     </script>
 
 </head>
-
-<body>
-
+<body> 
+<div class="bg-slider">
+        <div class="bg-slide bg-slide-1"></div>
+        <div class="bg-slide bg-slide-2"></div>
+        <div class="bg-slide bg-slide-3"></div>
+        <div class="bg-slide bg-slide-4"></div>
+    </div>
+    <div class="bg-overlay"></div>
     <nav>
         <div class="nav-left">
             <div class="nav-logo-icon">✈️</div>
@@ -708,6 +766,8 @@
             <a href="index2.html" class="btn-plan">Plan a Trip</a>
         </div>
     </nav>
+
+    
 
     <div class="container">
         <div id="loader">
@@ -744,16 +804,13 @@
                         </div>
                     </div>
 
-                    <!-- <button class="btn-print" onclick="window.print()">🖨️ Download PDF</button> -->
-                </aside>
+                    </aside>
 
                 <main class="content-area">
                     <div id="tab-itinerary" class="tab-content active">
                         <div id="itinerary-cards-container"></div>
                     </div>
-
-                    <div id="itinerary-cards-container">
-                    </div>
+                    
                     <div id="tab-stays" class="tab-content">
                         <div class="glass-card" id="stays-container"></div>
                     </div>
@@ -952,7 +1009,7 @@
                             guestCount = (llmData.guests.adult || 0) + (llmData.guests.child || 0) + (llmData.guests.infant || 0);
                             if (guestCount === 0) guestCount = 1;
                         }
-                        document.getElementById('dest-sub').innerText = '📅 ' + (responseData.data.timing || llmData?.timing || 'Flexible') + '  |  👥 ' + guestCount + ' Guests';
+                        document.getElementById('dest-sub').innerText = '📅 ' + (responseData.data.timing || llmData?.timing || 'Flexible') + '  |  👥 ' + guestCount + ' Guests';
                     }
                 } else {
                     const response = await fetch('http://localhost:5000/api/recommend', {
@@ -966,7 +1023,7 @@
                             guestCount = (llmData.guests.adult || 0) + (llmData.guests.child || 0) + (llmData.guests.infant || 0);
                             if (guestCount === 0) guestCount = 1;
                         }
-                        document.getElementById('dest-sub').innerText = '📅 ' + (llmData.timing || 'Flexible') + '  |  👥 ' + guestCount + ' Guests';
+                        document.getElementById('dest-sub').innerText = '📅 ' + (llmData.timing || 'Flexible') + '  |  👥 ' + guestCount + ' Guests';
                     }
                 }
 
@@ -1166,7 +1223,6 @@
                                     else if (catLower.indexOf('stay') !== -1 || catLower.indexOf('hotel') !== -1) { icon = '🏨'; category = 'Stay'; }
                                     else if (catLower.indexOf('activit') !== -1) { icon = '🎟️'; category = 'Activities'; }
 
-                                    // 🔥 FIX: NO SYNTAX ERROR HERE 🔥
                                     formattedItems += `<div style="padding: 16px 0; border-bottom: 1px dashed #E5E7EB; display: flex; justify-content: space-between; align-items: center;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size: 22px;">${icon}</span> <span style="font-weight: 600; color: #4B5563; font-size: 16px;">${category}</span></div><span style="font-weight: 800; color: #111827; font-size: 16px;">${displayAmount}</span></div>`;
                                 }
 
@@ -1234,7 +1290,6 @@
                     }
 
                  if (isOverBudget && !isImpossible) {
-                        // JS Calculator: Exact extra amount nikalenge
                         let extraAmount = calculatedGrandTotal - numericLimit;
                         
                         budgetHTML += `<div style="background: rgba(232, 28, 92, 0.08); padding: 24px; border-radius: 16px; border-left: 5px solid var(--brand-red);">
@@ -1247,7 +1302,6 @@
                         </ul>
                     </div>`;
                     } else if (!isOverBudget && !isImpossible) {
-                        // Success message with exact calculated amount
                         budgetHTML += `<div style="background: rgba(23, 79, 39, 0.08); padding: 20px 24px; border-radius: 12px; border-left: 5px solid var(--green-mid); color: var(--green-mid); font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 24px;">✅</span> Great! Your trip is under budget. You are saving ₹${(numericLimit - calculatedGrandTotal).toLocaleString('en-IN')}!
                     </div>`;
@@ -1266,23 +1320,65 @@
                 document.getElementById('itinerary-cards-container').innerHTML = '<div class="glass-card"><h2 style="color:red;">Server Connection Failed</h2><p>Please check if the Node backend is running.</p></div>';
             }
         };
-        //download PDF
 
-        function downloadPDF() {
+        // PDF Generation with html2pdf.js
+
+       function downloadPDF() {
             const btn = document.getElementById('pdf-btn');
             btn.innerHTML = "⏳ Generating PDF...";
+            
             const element = document.getElementById('itinerary-cards-container');
+
             const opt = {
                 margin: 0.5,
                 filename: 'TravelGenieAi_Trip.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    // 🔥 NAYA JADOO: html2pdf ka official method jo sirf PDF generate hote waqt design change karta hai
+                    onclone: function (clonedDoc) {
+                        const clonedContainer = clonedDoc.getElementById('itinerary-cards-container');
+                        clonedContainer.style.background = '#ffffff'; // PDF ka background white
+                        clonedContainer.style.padding = '20px';
+                        
+                        // Saare glass cards ka blur aur shadow hata kar clean A4 format set karna
+                        const cards = clonedContainer.querySelectorAll('.glass-card');
+                        cards.forEach(card => {
+                            card.style.background = '#ffffff';
+                            card.style.backdropFilter = 'none'; // PDF renderer ko blur se dikkat hoti hai
+                            card.style.boxShadow = 'none';
+                            card.style.border = '1px solid #e5e7eb';
+                            card.style.color = '#111111'; // Text proper dark
+                            card.style.marginBottom = '20px';
+                            card.style.pageBreakInside = 'avoid'; // Page ke beech se card na kate
+                        });
+
+                        // Lists ka color bhi theek karna
+                        const lists = clonedContainer.querySelectorAll('li');
+                        lists.forEach(li => {
+                            li.style.background = '#fafafa';
+                            li.style.color = '#333333';
+                            li.style.border = '1px solid #eee';
+                        });
+                        
+                        // Headings ko green karna
+                        const headings = clonedContainer.querySelectorAll('h2');
+                        headings.forEach(h2 => {
+                            h2.style.color = '#174F27'; // Dark green color
+                        });
+                    }
+                },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
+            // Generate and Save
             html2pdf().set(opt).from(element).save().then(() => {
                 btn.innerHTML = "📥 Download as PDF"; 
+            }).catch(err => {
+                console.error("PDF Error:", err);
+                btn.innerHTML = "❌ Error in PDF";
+                setTimeout(() => { btn.innerHTML = "📥 Download as PDF"; }, 3000);
             });
         }
     </script>
