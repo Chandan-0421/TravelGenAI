@@ -184,12 +184,13 @@
 
     <!-- 🔥 JAVASCRIPT LOGIC 🔥 -->
     <script>
+        const API_BASE_URL = "https://travelgenai-backend.onrender.com";
         let supabaseClient;
         let userEmailForOtp = "";
 
         async function initSupabase() {
             try {
-                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const res = await fetch(`${API_BASE_URL}/api/supabase-config`);
                 const config = await res.json();
                 supabaseClient = supabase.createClient(config.url, config.key);
             } catch (error) {
@@ -246,7 +247,7 @@
                     showError(error.message);
                     document.getElementById('action-btn').innerText = "Log In";
                 } else {
-                    window.location.href = 'index2.html'; 
+                    window.location.href = 'index.html'; 
                 }
             } else {
                 // 🔥 SIGN UP: Yahan Supabase mein Metadata (Name) bhej rahe hain 🔥
@@ -298,13 +299,13 @@
                 const errorMsg = document.getElementById('error-msg');
                 errorMsg.style.borderLeftColor = '#34D399'; errorMsg.style.background = 'rgba(52, 211, 153, 0.1)'; 
                 errorMsg.innerHTML = "✅ Account Verified Successfully!";
-                setTimeout(() => window.location.href = 'index2.html', 1000);
+                setTimeout(() => window.location.href = 'index.html', 1000);
             }
         }
 
         async function signInWithGoogle() {
             if (!supabaseClient) return;
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/index2.html' } });
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/index.html' } });
             if (error) showError(error.message);
         }
     </script>

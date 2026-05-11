@@ -754,10 +754,10 @@
     <nav>
         <div class="nav-left">
             <div class="nav-logo-icon">✈️</div>
-            <a href="index2.html" class="logo">TravelGenie<span style="color:var(--brand-orange)">Ai</span></a>
+            <a href="index.html" class="logo">TravelGenie<span style="color:var(--brand-orange)">Ai</span></a>
         </div>
         <div class="nav-center" id="nav-tabs" style="display: none;">
-            <a href="index2.html" class="nav-link">Home</a>
+            <a href="index.html" class="nav-link">Home</a>
             <button class="nav-link active" onclick="switchTab('itinerary', this)">Itinerary</button>
             <button class="nav-link" onclick="switchTab('stays', this)">Stays</button>
             <button class="nav-link" onclick="switchTab('packing', this)">Packing</button>
@@ -765,7 +765,7 @@
             <button class="nav-link" onclick="switchTab('budget', this)">Budget</button>
         </div>
         <div class="nav-right">
-            <a href="index2.html" class="btn-plan">Plan a Trip</a>
+            <a href="index.html" class="btn-plan">Plan a Trip</a>
         </div>
     </nav>
 
@@ -891,6 +891,7 @@
     </div>
 
    <script>
+    
         function switchTab(tabName, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
@@ -975,6 +976,7 @@
                 }
             } catch (err) { }
         }
+        const API_BASE_URL = "https://travelgenai-backend.onrender.com";
 
         window.onload = async function () {
             const rawData = localStorage.getItem('travelGenieRequest');
@@ -983,7 +985,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tripId = urlParams.get('id');
 
-            if (!rawData && !tripId) { window.location.href = 'index2.html'; return; }
+            if (!rawData && !tripId) { window.location.href = 'index.html'; return; }
 
             // Safe logic for guest count
             if (llmData && llmData.destination) {
@@ -994,7 +996,7 @@
                 let responseData;
 
                 if (tripId) {
-                    const response = await fetch(`http://localhost:5000/api/trip/${tripId}`);
+                    const response = await fetch(`${API_BASE_URL}/api/trip/${tripId}`);
                     responseData = await response.json();
 
                     if (responseData && responseData.success && responseData.data) {
@@ -1014,7 +1016,7 @@
                         document.getElementById('dest-sub').innerText = '📅 ' + (responseData.data.timing || llmData?.timing || 'Flexible') + '  |  👥 ' + guestCount + ' Guests';
                     }
                 } else {
-                    const response = await fetch('http://localhost:5000/api/recommend', {
+                    const response = await fetch(`${API_BASE_URL}/api/recommend`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(llmData)
                     });
                     responseData = await response.json();

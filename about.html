@@ -260,7 +260,7 @@
         <a href="index.html" class="logo"><span class="logo-icon">⛺</span>TravelGenie<span style="color:var(--brand-red)">Ai</span></a>
 
         <ul class="nav-links">
-            <li><a href="index2.html">Home</a></li>
+            <li><a href="index.html">Home</a></li>
             <li><a href="#" class="active">About AI</a></li>
         </ul>
 
@@ -302,13 +302,15 @@
 
     <!-- 🔥 SUPABASE AUTH LOGIC (So navbar shows correct login state) 🔥 -->
     <script>
+        const API_BASE_URL = "https://travelgenai-backend.onrender.com";
+
         let supabaseClient;
         window.currentUserId = null;
 
         async function initSupabase() {
             try {
                 // Adjust this endpoint if your backend URL is different
-                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const res = await fetch(`${API_BASE_URL}/api/supabase-config`);
                 const config = await res.json();
                 supabaseClient = supabase.createClient(config.url, config.key);
                 checkUserAuth();

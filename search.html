@@ -117,8 +117,8 @@
 <body>
 
 <nav>
-    <a href="index2.html" class="logo">⛺ TravelGenie<span style="color:var(--brand-red)">Ai</span></a>
-    <a href="index2.html" class="nav-btn">⬅ Back to Search</a>
+    <a href="index.html" class="logo">⛺ TravelGenie<span style="color:var(--brand-red)">Ai</span></a>
+    <a href="index.html" class="nav-btn">⬅ Back to Search</a>
 </nav>
 
 <div class="container">
@@ -141,11 +141,12 @@
 </div>
 
 <script>
+    const API_BASE_URL = "https://travelgenai-backend.onrender.com";
     window.onload = async function() {
         const rawData = localStorage.getItem('travelGenieRequest');
         if(!rawData) {
             alert("No travel data found. Redirecting to home.");
-            window.location.href = 'index2.html';
+            window.location.href = 'index.html';
             return;
         }
 
@@ -155,7 +156,7 @@
         document.getElementById('dest-sub').innerText = `📅 ${llmData.timing}  |  👥 ${llmData.guests.adult + llmData.guests.child} Guests  |  💰 ${llmData.budget_limit}`;
 
         try {
-            const response = await fetch('http://localhost:5000/api/recommend', {
+            const response = await fetch(`${API_BASE_URL}/api/recommend`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(llmData)

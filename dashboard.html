@@ -149,9 +149,9 @@
 </head>
 <body>
     <nav>
-        <a href="index2.html" class="logo">⛺ TravelGenie<span style="color:var(--brand-orange)">Ai</span></a>
+        <a href="index.html" class="logo">⛺ TravelGenie<span style="color:var(--brand-orange)">Ai</span></a>
         <div class="nav-btns">
-            <button class="btn-home" onclick="window.location.href='index2.html'">Plan New Trip</button>
+            <button class="btn-home" onclick="window.location.href='index.html'">Plan New Trip</button>
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
     </nav>
@@ -167,7 +167,7 @@
         <div id="empty-state">
             <h2>No trips found! 🏜️</h2>
             <p>Looks like you haven't planned any adventures yet.</p>
-            <button class="btn-start" onclick="window.location.href='index2.html'">Start Exploring Now</button>
+            <button class="btn-start" onclick="window.location.href='index.html'">Start Exploring Now</button>
         </div>
 
         <div class="trips-grid" id="trips-container">
@@ -188,11 +188,12 @@
 
     <script>
         let supabaseClient;
+        const API_BASE_URL = "https://travelgenai-backend.onrender.com";
 
         async function init() {
             try {
                 // Backend se securely keys lana
-                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const res = await fetch(`${API_BASE_URL}/api/supabase-config`);
                 const config = await res.json();
                 supabaseClient = supabase.createClient(config.url, config.key);
                 checkAuthAndFetchTrips();
@@ -236,7 +237,7 @@
         async function getImagesForDestination(dest) {
             try {
                 const query = dest.split(',')[0].trim();
-                const res = await fetch(`http://localhost:5000/api/images?dest=${encodeURIComponent(query)}`);
+                const res = await fetch(`${API_BASE_URL}/api/images?dest=${encodeURIComponent(query)}`);
                 const data = await res.json();
                 
                 if (data.success && data.images && data.images.length >= 3) {
@@ -299,7 +300,7 @@
 
         async function logout() {
             await supabaseClient.auth.signOut();
-            window.location.href = 'index2.html';
+            window.location.href = 'index.html';
         }
         
         let tripIdToDelete = null;

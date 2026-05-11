@@ -2,7 +2,7 @@
   "name": "TravelGenieAi Planner",
   "short_name": "TravelGenie",
   "description": "AI-Powered Tourist Recommendation and Budget Management System",
-  "start_url": "/index2.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#113534",
   "theme_color": "#F59E0B",

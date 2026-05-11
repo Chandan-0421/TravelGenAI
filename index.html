@@ -1307,10 +1307,11 @@
          ----------------------------------------------------------- */
         let supabaseClient;
         window.currentUserId = null;
+        const API_BASE_URL = "https://travelgenai-backend.onrender.com";
 
         async function initSupabase() {
             try {
-                const res = await fetch('http://localhost:5000/api/supabase-config');
+                const res = await fetch(`${API_BASE_URL}/api/supabase-config`);
                 const config = await res.json();
                 supabaseClient = supabase.createClient(config.url, config.key);
                 checkUserAuth();
